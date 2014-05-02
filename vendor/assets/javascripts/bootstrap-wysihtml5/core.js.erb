@@ -288,6 +288,7 @@
             var self = this;
             var insertLinkModal = toolbar.find('.bootstrap-wysihtml5-insert-link-modal');
             var urlInput = insertLinkModal.find('.bootstrap-wysihtml5-insert-link-url');
+            var textInput = insertLinkModal.find('.bootstrap-wysihtml5-insert-link-title');
             var targetInput = insertLinkModal.find('.bootstrap-wysihtml5-insert-link-target');
             var insertButton = insertLinkModal.find('a.btn-primary');
             var initialValue = urlInput.val();
@@ -295,6 +296,7 @@
 
             var insertLink = function() {
                 var url = urlInput.val();
+                var text = textInput.val();
                 urlInput.val(initialValue);
                 self.editor.currentView.element.focus();
                 if (caretBookmark) {
@@ -306,7 +308,8 @@
                 self.editor.composer.commands.exec("createLink", {
                     'href' : url,
                     'target' : (newWindow ? '_blank' : '_self'),
-                    'rel' : (newWindow ? 'nofollow' : '')
+                    'rel' : (newWindow ? 'nofollow' : ''),
+                    'text' : text
                 });
             };
             var pressedEnter = false;
