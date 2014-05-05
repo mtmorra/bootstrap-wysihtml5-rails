@@ -195,7 +195,11 @@
                     }
 
                     if(key === "image") {
-                        this.initInsertImage(toolbar);
+                        if(options['initInsertImageOverride'] !== undefined){
+                            this.initInsertImage(toolbar, options['initInsertImageOverride']);
+                        else{
+                            this.initInsertImage(toolbar, null);
+                        }
                     }
                 }
             }
@@ -230,7 +234,7 @@
             });
         },
 
-        initInsertImage: function(toolbar) {
+        initInsertImage: function(toolbar, override_function) {
             var self = this;
             var insertImageModal = toolbar.find('.bootstrap-wysihtml5-insert-image-modal');
             var urlInput = insertImageModal.find('.bootstrap-wysihtml5-insert-image-url');
@@ -239,6 +243,7 @@
             var caretBookmark;
 
             var insertImage = function() {
+
                 var url = urlInput.val();
                 urlInput.val(initialValue);
                 self.editor.currentView.element.focus();
@@ -304,7 +309,9 @@
                   caretBookmark = null;
                 }
 
-                var newWindow = targetInput.prop("checked");
+                //var newWindow = targetInput.prop("checked");
+                //default to new window 
+                var newWindow = true;
                 self.editor.composer.commands.exec("createLink", {
                     'href' : url,
                     'target' : (newWindow ? '_blank' : '_self'),
