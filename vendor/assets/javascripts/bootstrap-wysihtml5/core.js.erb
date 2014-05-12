@@ -311,9 +311,11 @@
 
                 //var newWindow = targetInput.prop("checked");
                 //default to new window 
+                var newWindow = true;
                 self.editor.composer.commands.exec("createLink", {
                     'href' : url,
-                    'target' : '_blank',
+                    'target' : (newWindow ? '_blank' : '_self'),
+                    'rel' : (newWindow ? 'nofollow' : ''),
                     'text' : text
                 });
             };
