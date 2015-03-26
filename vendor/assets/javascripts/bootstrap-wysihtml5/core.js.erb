@@ -115,6 +115,25 @@
                 "<li><div class='wysihtml5-colors' data-wysihtml5-command-value='orange'></div><a class='wysihtml5-colors-title' data-wysihtml5-command='foreColor' data-wysihtml5-command-value='orange'>" + locale.colours.orange + "</a></li>" +
               "</ul>" +
             "</li>";
+        },
+
+        "activityLink": function(locale, options) {
+            var size = (options && options.size) ? ' btn-'+options.size : '';
+            return "<li>" +
+              "<div class='bootstrap-wysihtml5-insert-activity-link-modal modal hide fade'>" +
+                "<div class='modal-header'>" +
+                  "<a class='close' data-dismiss='modal'>&times;</a>" +
+                  "<h3>" + locale.activityLink.insert + "</h3>" +
+                "</div>" +
+                "<div class='modal-body'>" +
+                "</div>" +
+                "<div class='modal-footer'>" +
+                  "<a href='#' class='btn btn-danger' data-dismiss='modal'>" + locale.activityLink.cancel + "</a>" +
+                  "<a href='#' class='btn btn-primary' data-dismiss='modal'>" + locale.activityLink.insert + "</a>" +
+                "</div>" +
+              "</div>" +
+              "<a class='btn" + size + "' data-wysihtml5-command='createActivityLink' title='" + locale.activityLink.insert + "' tabindex='-1'><i class='icon-external-link'></i></a>" +
+            "</li>";
         }
     };
 
@@ -149,7 +168,7 @@
 
         createEditor: function(options) {
             options = options || {};
-            
+
             // Add the toolbar to a clone of the options object so multiple instances
             // of the WYISYWG don't break because "toolbar" is already defined
             options = $.extend(true, {}, options);
@@ -200,6 +219,10 @@
                         }else{
                             this.initInsertImage(toolbar, null);
                         }
+                    }
+
+                    if(key === "activityLink") {
+                        this.initInsertActivityLink(toolbar);
                     }
                 }
             }
@@ -310,7 +333,7 @@
                 }
 
                 //var newWindow = targetInput.prop("checked");
-                //default to new window 
+                //default to new window
                 var newWindow = true;
                 self.editor.composer.commands.exec("createLink", {
                     'href' : url,
@@ -346,6 +369,68 @@
                     caretBookmark = self.editor.composer.selection.getBookmark();
                     insertLinkModal.appendTo('body').modal('show');
                     insertLinkModal.on('click.dismiss.modal', '[data-dismiss="modal"]', function(e) {
+                        e.stopPropagation();
+                    });
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            });
+        },
+
+        initInsertActivityLink: function(toolbar) {
+            var self = this;
+            var insertActivityLinkModal = toolbar.find('.bootstrap-wysihtml5-insert-activity-link-modal');
+            var insertActivityLinkModalBody = insertActivityLinkModal.find('.modal-body');
+            var caretBookmark;
+            var insertActivityButton = insertActivityLinkModal.find('a.btn-primary');
+            insertActivityLinkModalBody.html($('#activity_link_modal_container').html());
+            var activityTypeDropdown;
+            var activityIdDropdown;
+
+            var insertActivityLink = function() {
+                activityTypeDropdown = insertActivityLinkModalBody.find('.activity_link_type_filter_dropdown');
+                activityIdDropdown = insertActivityLinkModalBody.find('.activity_link_id_dropdown');
+                var activityType = activityTypeDropdown.val();
+                var activityId = activityIdDropdown.val();
+                var activityName = activityIdDropdown.siblings('.chzn-container').find('.result-selected').html();
+                self.editor.currentView.element.focus();
+                if (caretBookmark) {
+                    self.editor.composer.selection.setBookmark(caretBookmark);
+                    caretBookmark = null;
+                }
+
+                //var newWindow = targetInput.prop("checked");
+                //default to new window
+                var newWindow = true;
+                self.editor.composer.commands.exec("createActivityLink", {
+                    'data-activity-type' : activityType,
+                    'data-activity-id' : activityId,
+                    'text' : activityName,
+                    'class' : "activity_link"
+                });
+            };
+
+            insertActivityButton.click(insertActivityLink);
+
+            insertActivityLinkModal.on('shown', function() {
+                $(this).find('.chzn-select').chosen();
+                $(this).find('#activity_link_id_chzn').width(220);
+            });
+
+            insertActivityLinkModal.on('hide', function() {
+                self.editor.currentView.element.focus();
+            });
+
+            toolbar.find('a[data-wysihtml5-command=createActivityLink]').click(function() {
+                var activeButton = $(this).hasClass("wysihtml5-command-active");
+
+                if (!activeButton) {
+                    self.editor.currentView.element.focus(false);
+                    caretBookmark = self.editor.composer.selection.getBookmark();
+                    insertActivityLinkModal.appendTo('body').modal('show');
+                    insertActivityLinkModal.on('click.dismiss.modal', '[data-dismiss="modal"]', function(e) {
                         e.stopPropagation();
                     });
                     return false;
@@ -391,7 +476,7 @@
             return methods.init.apply( this, arguments );
         } else {
             $.error( 'Method ' +  method + ' does not exist on jQuery.wysihtml5' );
-        }    
+        }
     };
 
     $.fn.wysihtml5.Constructor = Wysihtml5;
@@ -404,6 +489,7 @@
         "html": false,
         "link": true,
         "image": true,
+        "activityLink": false,
         events: {},
         parserRules: {
             classes: {
@@ -423,7 +509,8 @@
                 "wysiwyg-color-blue" : 1,
                 "wysiwyg-color-teal" : 1,
                 "wysiwyg-color-aqua" : 1,
-                "wysiwyg-color-orange" : 1
+                "wysiwyg-color-orange" : 1,
+                "activity_link" : 1
             },
             tags: {
                 "b":  {},
@@ -455,7 +542,12 @@
                         'rel': 'alt'
                     }
                 },
-                "span": 1,
+                "span": {
+                    check_attributes: {
+                        'data-activity-type': "numbers", // important to avoid XSS
+                        'data-activity-id': 'numbers'
+                    }
+                },
                 "div": 1,
                 // to allow save and edit files with code tag hacks
                 "code": 1,
@@ -516,6 +608,11 @@
                 navy: "Navy",
                 blue: "Blue",
                 orange: "Orange"
+            },
+            activityLink: {
+                insert: "Insert activity link",
+                cancel: "Cancel",
+                target: "Open link in new window"
             }
         }
     };
