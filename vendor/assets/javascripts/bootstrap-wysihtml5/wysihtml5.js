@@ -21,6 +21,7 @@ var wysihtml5 = {
   views:      {},
   
   INVISIBLE_SPACE: "\uFEFF",
+  NO_BREAK_SPACE: "\u00A0",
   
   EMPTY_FUNCTION: function() {},
   
@@ -7045,7 +7046,7 @@ wysihtml5.Commands = Base.extend(
             if (!hasElementChild && isEmpty) {
                 dom.setTextContent(anchor, attributes.text);
             }
-            whiteSpace = doc.createTextNode(" ");
+            whiteSpace = doc.createTextNode(wysihtml5.NO_BREAK_SPACE);
             composer.selection.setAfter(anchor);
             composer.selection.insertNode(whiteSpace);
             elementToSetCaretAfter = whiteSpace;
