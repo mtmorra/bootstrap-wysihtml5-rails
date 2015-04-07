@@ -7047,8 +7047,9 @@ wysihtml5.Commands = Base.extend(
                 dom.setTextContent(anchor, attributes.text);
             }
             whiteSpace = doc.createTextNode(wysihtml5.NO_BREAK_SPACE);
-            composer.selection.setAfter(anchor);
-            composer.selection.insertNode(whiteSpace);
+            //composer.selection.setAfter(anchor);
+            //composer.selection.insert(whiteSpace);
+            anchor.parentNode.insertBefore(whiteSpace, anchor.nextSibling);
             elementToSetCaretAfter = whiteSpace;
         }
         composer.selection.setAfter(elementToSetCaretAfter);
